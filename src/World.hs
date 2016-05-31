@@ -14,48 +14,50 @@ width = 500 :: CInt
 height = 500 :: CInt
 
 maxBeasts = 1000000 -- arbitrary cap
-grassGrowPerTick = 0.05 :: Double -- arbitrary grass growth rate.
-grassBaseNutrition = 1.0 -- arbitrary unit of nutrition from grass.
+plantGrowPerTick = 0.05 :: Double -- arbitrary grass growth rate.
+plantBaseNutrition = 1.0 -- arbitrary unit of nutrition from grass.
 
-data Grass = Grass Location Height
+data Plant = Plant Location Height
 -- data Beast = Location NeuralNetwork HitPoints FoodStores AttackPower Carnivorousness MutationRate Flightiness
-data World = World [Grass] -- [Beast]
+data World = World [Plant] -- [Beast]
 
-grassLocations :: [Location]
-grassLocations = [(P $ V2 (CInt (fromIntegral x)) (CInt (fromIntegral y))) | x <- [0..width], y <- [0..height]]
+plantLocations :: [Location]
+plantLocations = [(P $ V2 (CInt (fromIntegral x)) (CInt (fromIntegral y))) | x <- [0,10..width], y <- [0,10..height]]
 
-initGrass :: [Location] -> [Height] -> [Grass]
-initGrass locations heights = zipWith (\location height -> Grass location height) locations heights
+initPlant :: [Location] -> [Height] -> [Plant]
+initPlant locations heights = zipWith (\location height -> Plant location height) locations heights
 
-initGrassStatic :: [Grass]
-initGrassStatic = initGrass grassLocations heights
-    where heights = take (length grassLocations) $ repeat (100 :: Word8)
+initPlantsStatic :: [Plant]
+initPlantsStatic = initPlant plantLocations heights
+    where heights = take (length plantLocations) $ repeat (100 :: Word8)
 
-initGrassRandom :: IO [Grass]
-initGrassRandom = do
+initPlantsRandom :: IO [Plant]
+initPlantsRandom = do
     g <- newStdGen
-    let randomHeights = take (length grassLocations) $ randomRs (0,255) g
-    return $ initGrass grassLocations randomHeights
+    let randomHeights = take (length plantLocations) $ randomRs (0,255) g
+    return $ initPlant plantLocations randomHeights
 
-initWorld :: [Grass] -> World
-initWorld grasses = World grasses
+initWorld :: [Plant] -> World
+initWorld plants = World plants
 
 initWorldStatic :: World
-initWorldStatic = initWorld initGrassStatic
+initWorldStatic = initWorld initPlantsStatic
 
 initWorldRandom :: IO World
 initWorldRandom = do
-    grasses <- initGrassRandom
-    return $ initWorld grasses
+    plants <- initPlantsRandom
+    return $ initWorld plants
 
 updateWorld :: World -> IO World
-updateWorld (World grass) = do
-    grass' <- grassGrows grass
-    return $ World grass'
+updateWorld (World plants) = do
+    plants' <- plantsGrow plants
+    return $ World plants'
 
-grassGrows :: [Grass] -> IO [Grass]
-grassGrows grass = do
+plantsGrow :: [Plant] -> IO [Plant]
+plantsGrow plants = do
     g <- newStdGen
-    let grassGrowChance = randomRs (0.0,0.1) g
-    let grassGrowList = zip grass grassGrowChance
-    return $ map (\(grass@(Grass location height),growChance) -> if growChance <= grassGrowPerTick then Grass location (height + 1) else grass) grassGrowList
+    let plantGrowChance = randomRs (0.0,0.1) g
+    let plantGrowList = zip plants plantGrowChance
+    let growConditions = growChance <= plantGrowPerTick && height < 256
+    return $ map (\(plant@(Plant location height),growChance) -> if growConditions then Plant location (height + 1) else plant) plantGrowList
+

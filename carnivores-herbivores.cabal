@@ -19,6 +19,7 @@ library
                        , Neural
                        , World
   build-depends:       base >= 4.7 && < 5
+                       , array
                        , sdl2
                        , linear
                        , mtl

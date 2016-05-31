@@ -52,14 +52,14 @@ draw renderer world = do
         present renderer
 
 drawWorld :: Renderer -> World -> IO ()
-drawWorld renderer (World grass) = do
-    drawGrass renderer grass
+drawWorld renderer (World plants) = do
+    drawPlants renderer plants
 
-drawGrass :: Renderer -> [Grass] -> IO ()
-drawGrass renderer grass = do
-    mapM_ (drawBladeOfGrass renderer) grass
+drawPlants :: Renderer -> [Plant] -> IO ()
+drawPlants renderer plants = do
+    mapM_ (drawPlant renderer) plants
 
-drawBladeOfGrass :: Renderer -> Grass -> IO ()
-drawBladeOfGrass renderer (Grass point height) = do
+drawPlant :: Renderer -> Plant -> IO ()
+drawPlant renderer (Plant point height) = do
     rendererDrawColor renderer $= V4 0 height 0 255
     drawPoint renderer point
